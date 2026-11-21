@@ -1,0 +1,6 @@
+{
+  "name": "Halvern Trust",
+  "description": "Private Settlement — Retail mobile settlement, activity ledger, withdrawal, and beneficiary profile.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,2859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+  <title>Halvern Trust — Private Settlement</title>
+  <meta name="description" content="Halvern Trust Private Settlement account overview, disbursement tracking, activity ledger, and beneficiary profile.">
+  <meta property="og:title" content="Halvern Trust — Private Settlement">
+  <meta property="og:description" content="Halvern Trust Private Settlement account overview, disbursement tracking, activity ledger, and beneficiary profile.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#071A2C">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23071A2C'/%3E%3Cpath d='M32 10L50 18V33C50 44.5 42.2 52.8 32 56C21.8 52.8 14 44.5 14 33V18L32 10Z' fill='none' stroke='%239CC3E6' stroke-width='3.5' stroke-linejoin='round'/%3E%3Cpath d='M25 24V40M39 24V40M25 32H39' stroke='%23FFFFFF' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #071A2C;
+      --panel: #0C2439;
+      --raised: #10304A;
+      --hairline: rgba(255, 255, 255, 0.08);
+      --hairline-strong: rgba(255, 255, 255, 0.16);
+      --text: #FFFFFF;
+      --muted: #93A7B8;
+      --accent: #9CC3E6;
+      --credit: #63C27E;
+      --debit: #FFFFFF;
+      --amber: #E0A94A;
+      --nav-height: 58px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      background: #05121F;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.4;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #05121F;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    button, input, textarea, select {
+      font-family: inherit;
+      font-size: 16px;
+      color: inherit;
+    }
+
+    button {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .tabular {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* App Shell */
+    .app-shell {
+      position: relative;
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0 auto;
+      background: var(--bg);
+      padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+      border-left: 1px solid var(--hairline);
+      border-right: 1px solid var(--hairline);
+    }
+
+    @media (max-width: 430px) {
+      .app-shell {
+        border-left: none;
+        border-right: none;
+      }
+      html, body {
+        background: var(--bg);
+      }
+    }
+
+    /* Top Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      padding: 0 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--panel);
+      border: 1px solid var(--hairline-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-desc {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .top-ref {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    /* Views */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Account Header Block */
+    .account-header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--hairline);
+      width: 100%;
+    }
+
+    .account-header-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 44px;
+      padding: 12px 16px 4px;
+      text-align: left;
+    }
+
+    .account-header-btn:active {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .account-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .balance-wrap {
+      padding: 2px 16px 12px;
+    }
+
+    .balance-amount {
+      font-size: 34px;
+      line-height: 1.15;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      word-break: break-word;
+    }
+
+    .hold-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-top: 1px solid var(--hairline);
+      font-size: 15px;
+    }
+
+    .hold-label {
+      color: var(--muted);
+    }
+
+    .hold-value {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 14px 12px 10px;
+      background: var(--bg);
+    }
+
+    .quick-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 4px 2px;
+      text-align: center;
+    }
+
+    .quick-tile:active .quick-icon-box {
+      background: var(--raised);
+    }
+
+    .quick-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--panel);
+      border: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      transition: background-color 0.12s ease;
+    }
+
+    .quick-label {
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 500;
+      color: var(--text);
+      max-width: 82px;
+    }
+
+    /* Show more / Edit row */
+    .utility-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 16px;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      background: var(--bg);
+    }
+
+    .utility-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .utility-btn svg {
+      transition: transform 0.15s ease;
+    }
+
+    .utility-btn[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+
+    .more-drawer {
+      display: none;
+      background: var(--panel);
+      border-bottom: 1px solid var(--hairline);
+      padding: 0 16px;
+    }
+
+    .more-drawer.open {
+      display: block;
+    }
+
+    .more-drawer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 14px;
+    }
+
+    .more-drawer-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Section Header */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px 8px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .icon-btn {
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      margin-right: -10px;
+      border-radius: 4px;
+    }
+
+    .icon-btn:active {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Search Bar */
+    .search-bar-wrap {
+      display: none;
+      padding: 0 16px 10px;
+    }
+
+    .search-bar-wrap.open {
+      display: block;
+    }
+
+    .search-input-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      padding: 0 10px;
+      min-height: 44px;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 16px;
+      min-height: 42px;
+    }
+
+    .search-input-box input::placeholder {
+      color: var(--muted);
+    }
+
+    /* Transaction List */
+    .tx-list {
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      background: var(--panel);
+    }
+
+    .tx-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 64px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--hairline);
+      text-align: left;
+      transition: background-color 0.1s ease;
+    }
+
+    .tx-row:last-child {
+      border-bottom: none;
+    }
+
+    .tx-row:active {
+      background: var(--raised);
+    }
+
+    .tx-tile {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #FFFFFF;
+      color: #071A2C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tx-mid {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tx-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tx-sub {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 3px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.01em;
+    }
+
+    .chip-due {
+      background: rgba(224, 169, 74, 0.16);
+      color: var(--amber);
+      border: 1px solid rgba(224, 169, 74, 0.35);
+    }
+
+    .chip-cleared {
+      background: rgba(99, 194, 126, 0.14);
+      color: var(--credit);
+      border: 1px solid rgba(99, 194, 126, 0.3);
+    }
+
+    .chip-beneficiary {
+      background: rgba(156, 195, 230, 0.14);
+      color: var(--accent);
+      border: 1px solid rgba(156, 195, 230, 0.3);
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    .tx-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .tx-amt {
+      font-size: 16px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tx-amt.credit {
+      color: var(--credit);
+    }
+
+    .tx-amt.debit {
+      color: var(--debit);
+    }
+
+    .tx-amt.amber {
+      color: var(--amber);
+    }
+
+    .tx-run {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tx-chevron {
+      color: var(--muted);
+      flex-shrink: 0;
+      margin-left: 2px;
+    }
+
+    .empty-state {
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* Settlement Panel */
+    .panel-wrap {
+      padding: 14px 16px 8px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--raised);
+    }
+
+    .kv-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--hairline);
+      min-height: 44px;
+    }
+
+    .kv-row:last-child {
+      border-bottom: none;
+    }
+
+    .kv-key {
+      font-size: 14px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .kv-val-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 0;
+      text-align: right;
+    }
+
+    .kv-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .kv-val.mono-num {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      min-width: 60px;
+      padding: 0 12px;
+      border-radius: 4px;
+      border: 1px solid var(--hairline-strong);
+      background: var(--raised);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background-color 0.12s ease, color 0.12s ease;
+    }
+
+    .copy-btn:active {
+      background: rgba(156, 195, 230, 0.2);
+    }
+
+    .copy-btn.copied {
+      background: rgba(99, 194, 126, 0.18);
+      border-color: rgba(99, 194, 126, 0.45);
+      color: var(--credit);
+    }
+
+    /* Action Buttons */
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      transition: opacity 0.12s ease, background-color 0.12s ease;
+    }
+
+    .btn:active {
+      opacity: 0.85;
+    }
+
+    .btn-full {
+      width: 100%;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #071A2C;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-secondary {
+      background: var(--raised);
+      color: var(--text);
+      border: 1px solid var(--hairline-strong);
+    }
+
+    /* Status Strip */
+    .status-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .status-strip.pending {
+      background: rgba(224, 169, 74, 0.12);
+      color: var(--amber);
+    }
+
+    .status-strip.verified {
+      background: rgba(99, 194, 126, 0.12);
+      color: var(--credit);
+    }
+
+    .quote-note {
+      padding: 8px 2px 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Activity Month Group */
+    .month-header {
+      padding: 10px 16px 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      background: var(--bg);
+      border-top: 1px solid var(--hairline);
+    }
+
+    .month-header:first-child {
+      border-top: none;
+    }
+
+    .filter-strip {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px 10px;
+    }
+
+    .filter-tab {
+      min-height: 44px;
+      min-width: 56px;
+      padding: 0 14px;
+      border-radius: 4px;
+      border: 1px solid var(--hairline-strong);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .filter-tab.active {
+      background: var(--raised);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Forms (Withdraw & Transfer) */
+    .page-header {
+      padding: 14px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .step-indicator {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .form-section {
+      padding: 14px 16px;
+    }
+
+    .balance-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+
+    .balance-banner-label {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .balance-banner-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .field {
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .max-link {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      min-height: 46px;
+      padding: 0 12px;
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .currency-prefix {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 6px;
+    }
+
+    .text-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 16px;
+      min-height: 44px;
+    }
+
+    .text-input.amount-input {
+      font-size: 22px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .text-input::placeholder {
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    .field-error {
+      margin-top: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--amber);
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    /* Combobox */
+    .combobox-list {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 2px);
+      z-index: 30;
+      background: var(--raised);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      max-height: 210px;
+      overflow-y: auto;
+      display: none;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .combobox-list.open {
+      display: block;
+    }
+
+    .combobox-option {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 15px;
+      color: var(--text);
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .combobox-option:last-child {
+      border-bottom: none;
+    }
+
+    .combobox-option:hover,
+    .combobox-option.active {
+      background: rgba(156, 195, 230, 0.16);
+      color: var(--accent);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .form-actions .btn {
+      flex: 1;
+    }
+
+    /* Activation & Processing & Receipt */
+    .state-card {
+      background: var(--panel);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 18px 16px;
+    }
+
+    .state-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .state-icon.amber {
+      background: rgba(224, 169, 74, 0.15);
+      color: var(--amber);
+    }
+
+    .state-icon.green {
+      background: rgba(99, 194, 126, 0.15);
+      color: var(--credit);
+    }
+
+    .state-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--text);
+    }
+
+    .state-body {
+      font-size: 16px;
+      color: var(--muted);
+      margin: 0 0 16px;
+      line-height: 1.45;
+    }
+
+    .id-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--raised);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+
+    .id-box-val {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stack-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .spinner-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--hairline-strong);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin-bottom: 14px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner {
+        animation: none;
+        border-top-color: var(--accent);
+      }
+      * {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Profile */
+    .profile-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px 16px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--raised);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+
+    .profile-footer {
+      padding: 18px 16px 10px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* Bottom Tab Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      z-index: 40;
+      background: var(--panel);
+      border-top: 1px solid var(--hairline);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: var(--nav-height);
+      min-height: 44px;
+      color: var(--muted);
+      transition: color 0.12s ease;
+    }
+
+    .nav-btn.active {
+      color: var(--accent);
+    }
+
+    .nav-label {
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    /* Bottom Sheet / Modal */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(3, 12, 22, 0.72);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .sheet-backdrop.open {
+      display: flex;
+    }
+
+    .sheet {
+      width: 100%;
+      max-width: 430px;
+      max-height: 86vh;
+      overflow-y: auto;
+      background: var(--panel);
+      border-top: 1px solid var(--hairline-strong);
+      border-radius: 4px 4px 0 0;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--raised);
+    }
+
+    .sheet-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .sheet-close {
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      margin-right: -10px;
+    }
+
+    .sheet-body {
+      padding: 14px 16px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+
+    .switch-btn {
+      min-width: 48px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .switch-track {
+      width: 46px;
+      height: 26px;
+      border-radius: 13px;
+      background: var(--bg);
+      border: 1px solid var(--hairline-strong);
+      position: relative;
+      transition: background-color 0.15s ease;
+    }
+
+    .switch-btn[aria-checked="true"] .switch-track {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .switch-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      transition: transform 0.15s ease;
+    }
+
+    .switch-btn[aria-checked="true"] .switch-knob {
+      transform: translateX(20px);
+      background: #071A2C;
+    }
+
+    .card-preview {
+      background: linear-gradient(135deg, #10304A 0%, #071A2C 100%);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L20 5.5V12C20 17.2 16.5 20.8 12 22C7.5 20.8 4 17.2 4 12V5.5L12 2Z" stroke="#9CC3E6" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M9 9V15M15 9V15M9 12H15" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Halvern Trust</span>
+          <span class="brand-desc">Private Settlement</span>
+        </div>
+      </div>
+      <span class="top-ref tabular">STL-4471</span>
+    </header>
+
+    <main>
+      <!-- HOME VIEW -->
+      <section id="view-home" class="view active" aria-label="Home">
+        <div class="account-header">
+          <button type="button" class="account-header-btn" id="btn-account-summary">
+            <span class="account-title">Available Balance</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93A7B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+          <div class="balance-wrap">
+            <div class="balance-amount tabular" id="home-balance">$750,000.00</div>
+          </div>
+          <div class="hold-row" id="home-hold-row">
+            <span class="hold-label">Deposit on hold</span>
+            <span class="hold-value tabular">$300.00</span>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions" role="group" aria-label="Quick actions">
+          <button type="button" class="quick-tile" id="qa-manage-account">
+            <span class="quick-icon-box" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                <line x1="7" y1="9" x2="17" y2="9"></line>
+                <line x1="7" y1="13" x2="13" y2="13"></line>
+              </svg>
+            </span>
+            <span class="quick-label">Manage Account</span>
+          </button>
+
+          <button type="button" class="quick-tile" id="qa-manage-card">
+            <span class="quick-icon-box" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+                <line x1="6" y1="15" x2="10" y2="15"></line>
+              </svg>
+            </span>
+            <span class="quick-label">Manage Card</span>
+          </button>
+
+          <button type="button" class="quick-tile" id="qa-transfer-pay">
+            <span class="quick-icon-box" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="17 1 21 5 17 9"></polyline>
+                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                <polyline points="7 23 3 19 7 15"></polyline>
+                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+              </svg>
+            </span>
+            <span class="quick-label">Transfer &amp; Pay Bills</span>
+          </button>
+
+          <button type="button" class="quick-tile" id="qa-make-deposit">
+            <span class="quick-icon-box" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <path d="M4 19h16"></path>
+              </svg>
+            </span>
+            <span class="quick-label">Make a Deposit</span>
+          </button>
+        </div>
+
+        <!-- Show more / Edit Row -->
+        <div class="utility-row">
+          <button type="button" class="utility-btn" id="btn-show-more" aria-expanded="false" aria-controls="more-drawer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span id="show-more-label">Show more</span>
+          </button>
+          <button type="button" class="utility-btn" id="btn-edit-home">Edit</button>
+        </div>
+
+        <div id="more-drawer" class="more-drawer">
+          <div class="more-drawer-row">
+            <span class="kv-key">Settlement Account</span>
+            <span class="kv-val">Halvern Trust — Client Account</span>
+          </div>
+          <div class="more-drawer-row">
+            <span class="kv-key">Pending Clearance</span>
+            <span class="kv-val tabular" style="color: var(--amber);">$300.00</span>
+          </div>
+          <div class="more-drawer-row">
+            <span class="kv-key">Disbursement Currency</span>
+            <span class="kv-val">USD ($)</span>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="section-head">
+          <h2 class="section-title">Recent Transactions</h2>
+          <button type="button" class="icon-btn" id="btn-home-search" aria-label="Search recent transactions" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="search-bar-wrap" id="home-search-wrap">
+          <div class="search-input-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93A7B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="search" id="home-search-input" placeholder="Filter transactions" aria-label="Filter recent transactions">
+          </div>
+        </div>
+
+        <div class="tx-list" id="home-tx-list"></div>
+
+        <!-- Settlement Panel -->
+        <div class="panel-wrap" id="home-settlement-wrap">
+          <div class="panel">
+            <div class="panel-header">Settlement Details</div>
+            <div class="kv-row">
+              <span class="kv-key">Reference</span>
+              <span class="kv-val tabular">STL-4471</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Beneficiary</span>
+              <span class="kv-val" id="settle-name">Account Holder</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Officer</span>
+              <span class="kv-val">Mr. Bernard Williams</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Released to</span>
+              <span class="kv-val">Halvern Trust — Client Account</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">IBAN</span>
+              <div class="kv-val-wrap">
+                <span class="kv-val mono-num" id="settle-iban">GB29 HLVN 4021 8840 1127 55</span>
+                <button type="button" class="copy-btn" data-copy-target="settle-iban" aria-label="Copy IBAN">Copy</button>
+              </div>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">SWIFT</span>
+              <div class="kv-val-wrap">
+                <span class="kv-val mono-num" id="settle-swift">HLVNGB2X</span>
+                <button type="button" class="copy-btn" data-copy-target="settle-swift" aria-label="Copy SWIFT">Copy</button>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn btn-accent" id="home-btn-withdraw">Withdraw</button>
+              <button type="button" class="btn btn-outline" id="home-btn-transfer">Transfer</button>
+            </div>
+
+            <div class="status-strip pending" id="home-status-strip">
+              <span id="home-status-icon" aria-hidden="true"></span>
+              <span id="home-status-text">Beneficiary verification pending</span>
+            </div>
+          </div>
+          <div class="quote-note">Quote reference STL-4471 to your officer.</div>
+        </div>
+      </section>
+
+      <!-- ACTIVITY VIEW -->
+      <section id="view-activity" class="view" aria-label="Activity">
+        <div class="page-header">
+          <h1 class="page-title">Activity</h1>
+          <button type="button" class="icon-btn" id="btn-activity-search" aria-label="Search activity" aria-expanded="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="search-bar-wrap" id="activity-search-wrap" style="padding-top: 10px;">
+          <div class="search-input-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#93A7B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="search" id="activity-search-input" placeholder="Search activity" aria-label="Search activity">
+          </div>
+        </div>
+
+        <div class="filter-strip" style="padding-top: 10px;" role="tablist" aria-label="Filter transactions by status">
+          <button type="button" class="filter-tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+          <button type="button" class="filter-tab" data-filter="Cleared" role="tab" aria-selected="false">Cleared</button>
+          <button type="button" class="filter-tab" data-filter="Due" role="tab" aria-selected="false">Due</button>
+        </div>
+
+        <div id="activity-groups"></div>
+      </section>
+
+      <!-- WITHDRAW VIEW -->
+      <section id="view-withdraw" class="view" aria-label="Withdraw">
+        <div class="page-header">
+          <h1 class="page-title">Withdraw</h1>
+          <span class="step-indicator" id="wd-step-label">Step 1 of 3</span>
+        </div>
+
+        <div class="form-section" id="wd-container">
+          <!-- Step 1 -->
+          <div id="wd-step-1">
+            <div class="balance-banner">
+              <span class="balance-banner-label">Available Balance</span>
+              <span class="balance-banner-val tabular" id="wd-avail-balance">$750,000.00</span>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="wd-amount">Withdrawal amount</label>
+                <button type="button" class="max-link" id="wd-max-btn">Max</button>
+              </div>
+              <div class="input-wrap">
+                <span class="currency-prefix" aria-hidden="true">$</span>
+                <input type="text" inputmode="decimal" id="wd-amount" class="text-input amount-input" placeholder="0.00" autocomplete="off">
+              </div>
+              <div class="field-error" id="wd-amount-error">Enter a valid amount up to your available balance.</div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-accent" id="wd-next-1">Continue</button>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div id="wd-step-2" style="display: none;">
+            <div class="balance-banner">
+              <span class="balance-banner-label">Withdrawal amount</span>
+              <span class="balance-banner-val tabular" id="wd-summary-amt">$0.00</span>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="wd-bank">Bank</label>
+              </div>
+              <div class="input-wrap">
+                <input
+                  type="text"
+                  id="wd-bank"
+                  class="text-input"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-controls="wd-bank-listbox"
+                  autocomplete="off"
+                  placeholder="Type or select bank name">
+              </div>
+              <div id="wd-bank-listbox" class="combobox-list" role="listbox" aria-label="Banks"></div>
+              <div class="field-error" id="wd-bank-error">Enter your destination bank name.</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="wd-acct-name">Account name</label>
+              </div>
+              <div class="input-wrap">
+                <input type="text" id="wd-acct-name" class="text-input" autocomplete="name" placeholder="Full name on account">
+              </div>
+              <div class="field-error" id="wd-acct-name-error">Enter the receiving account name.</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="wd-acct-num">Account number</label>
+              </div>
+              <div class="input-wrap">
+                <input type="text" id="wd-acct-num" class="text-input tabular" autocomplete="off" placeholder="Account number or IBAN">
+              </div>
+              <div class="field-error" id="wd-acct-num-error">Enter the receiving account number or IBAN.</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="wd-branch">Branch / sort code (if your country uses one)</label>
+              </div>
+              <div class="input-wrap">
+                <input type="text" id="wd-branch" class="text-input tabular" autocomplete="off" placeholder="Optional">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="wd-back-2">Back</button>
+              <button type="button" class="btn btn-accent" id="wd-next-2">Continue</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Unverified (act=0) -->
+          <div id="wd-step-3-hold" style="display: none;">
+            <div class="state-card">
+              <div class="state-icon amber" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <h2 class="state-title">Activation required</h2>
+              <p class="state-body">Your settlement is held. Send your Beneficiary ID to your officer to activate release.</p>
+
+              <div class="id-box">
+                <span class="id-box-val" id="wd-hold-id">BNF-0000-AA</span>
+                <button type="button" class="copy-btn" data-copy-target="wd-hold-id" aria-label="Copy Beneficiary ID">Copy</button>
+              </div>
+
+              <div class="stack-actions">
+                <button type="button" class="btn btn-secondary btn-full" id="wd-primary-copy-id">Copy ID</button>
+                <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-accent btn-full" id="wd-wa-link">Activate with your officer</a>
+                <button type="button" class="btn btn-outline btn-full" id="wd-back-3">Edit details</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Processing (act=1) -->
+          <div id="wd-step-3-proc" style="display: none;">
+            <div class="state-card spinner-wrap">
+              <div class="spinner" aria-hidden="true"></div>
+              <h2 class="state-title" style="margin-bottom: 4px;">Processing withdrawal</h2>
+              <p class="state-body" style="margin-bottom: 0;">Verifying settlement instruction...</p>
+            </div>
+          </div>
+
+          <!-- Step 3: Success (act=1) -->
+          <div id="wd-step-3-done" style="display: none;">
+            <div class="state-card">
+              <div class="state-icon green" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <h2 class="state-title">Withdrawal scheduled</h2>
+              <p class="state-body">Funds arrive in 1–3 business days</p>
+
+              <div class="panel" style="margin-bottom: 16px;">
+                <div class="kv-row">
+                  <span class="kv-key">Reference</span>
+                  <span class="kv-val mono-num" id="wd-done-ref">HLV-7F2K91</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-key">Amount</span>
+                  <span class="kv-val tabular" id="wd-done-amt">$0.00</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-key">Bank</span>
+                  <span class="kv-val" id="wd-done-bank">—</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-key">Account</span>
+                  <span class="kv-val" id="wd-done-acct">—</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-accent btn-full" id="wd-done-btn">Done</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANSFER VIEW -->
+      <section id="view-transfer" class="view" aria-label="Transfer">
+        <div class="page-header">
+          <h1 class="page-title">Transfer</h1>
+          <button type="button" class="utility-btn" id="tr-cancel-top" style="min-height: 36px;">Back</button>
+        </div>
+
+        <div class="form-section">
+          <div id="tr-form-step">
+            <div class="balance-banner">
+              <span class="balance-banner-label">Available Balance</span>
+              <span class="balance-banner-val tabular" id="tr-avail-balance">$750,000.00</span>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="tr-recipient">Recipient</label>
+              </div>
+              <div class="input-wrap">
+                <input type="text" id="tr-recipient" class="text-input" placeholder="Recipient full name or entity">
+              </div>
+              <div class="field-error" id="tr-recipient-error">Enter a recipient name.</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="tr-iban">IBAN</label>
+              </div>
+              <div class="input-wrap">
+                <input type="text" id="tr-iban" class="text-input mono-num" placeholder="Recipient IBAN or account number">
+              </div>
+              <div class="field-error" id="tr-iban-error">Enter a valid IBAN or account number.</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="tr-amount">Amount</label>
+                <button type="button" class="max-link" id="tr-max-btn">Max</button>
+              </div>
+              <div class="input-wrap">
+                <span class="currency-prefix" aria-hidden="true">$</span>
+                <input type="text" inputmode="decimal" id="tr-amount" class="text-input amount-input" placeholder="0.00" autocomplete="off">
+              </div>
+              <div class="field-error" id="tr-amount-error">Enter a valid amount up to your available balance.</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">
+                <label for="tr-note">Note</label>
+              </div>
+              <div class="input-wrap">
+                <input type="text" id="tr-note" class="text-input" placeholder="Reference or memo (optional)">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-accent" id="tr-continue-btn">Continue</button>
+            </div>
+          </div>
+
+          <div id="tr-proc-step" style="display: none;">
+            <div class="state-card spinner-wrap">
+              <div class="spinner" aria-hidden="true"></div>
+              <h2 class="state-title" style="margin-bottom: 4px;">Processing transfer</h2>
+              <p class="state-body" style="margin-bottom: 0;">Submitting settlement instruction...</p>
+            </div>
+          </div>
+
+          <div id="tr-done-step" style="display: none;">
+            <div class="state-card">
+              <div class="state-icon green" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <h2 class="state-title">Transfer submitted</h2>
+              <p class="state-body">Settlement instruction queued for disbursement</p>
+
+              <div class="panel" style="margin-bottom: 16px;">
+                <div class="kv-row">
+                  <span class="kv-key">Reference</span>
+                  <span class="kv-val mono-num" id="tr-done-ref">HLV-8K4M21</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-key">Recipient</span>
+                  <span class="kv-val" id="tr-done-recipient">—</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-key">IBAN</span>
+                  <span class="kv-val mono-num" id="tr-done-iban">—</span>
+                </div>
+                <div class="kv-row">
+                  <span class="kv-key">Amount</span>
+                  <span class="kv-val tabular" id="tr-done-amt">$0.00</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-accent btn-full" id="tr-done-btn">Done</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE VIEW -->
+      <section id="view-profile" class="view" aria-label="Profile">
+        <div class="profile-hero">
+          <div class="avatar" id="prof-avatar" aria-hidden="true">AH</div>
+          <h1 class="profile-name" id="prof-name">Account Holder</h1>
+          <span class="chip chip-beneficiary">Beneficiary</span>
+        </div>
+
+        <div class="panel-wrap">
+          <div class="panel">
+            <div class="kv-row">
+              <span class="kv-key">Beneficiary ID</span>
+              <div class="kv-val-wrap">
+                <span class="kv-val mono-num" id="prof-id">BNF-0000-AA</span>
+                <button type="button" class="copy-btn" data-copy-target="prof-id" aria-label="Copy Beneficiary ID">Copy</button>
+              </div>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">IBAN</span>
+              <div class="kv-val-wrap">
+                <span class="kv-val mono-num" id="prof-iban">GB29 HLVN 4021 8840 1127 55</span>
+                <button type="button" class="copy-btn" data-copy-target="prof-iban" aria-label="Copy IBAN">Copy</button>
+              </div>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">SWIFT</span>
+              <div class="kv-val-wrap">
+                <span class="kv-val mono-num" id="prof-swift">HLVNGB2X</span>
+                <button type="button" class="copy-btn" data-copy-target="prof-swift" aria-label="Copy SWIFT">Copy</button>
+              </div>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Account type</span>
+              <span class="kv-val">Settlement · Disbursement</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Officer</span>
+              <span class="kv-val">Mr. Bernard Williams</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Opened</span>
+              <span class="kv-val" id="prof-opened">—</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Status</span>
+              <span class="kv-val" id="prof-status" style="color: var(--amber);">Pending verification</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-full" id="prof-wa-link">Message officer</a>
+          </div>
+        </div>
+
+        <footer class="profile-footer">Halvern Trust · Private Settlement · Member deposits protected</footer>
+      </section>
+    </main>
+
+    <!-- Bottom Tab Bar -->
+    <nav class="bottom-nav" aria-label="Primary navigation">
+      <button type="button" class="nav-btn active" data-tab="home" aria-current="page">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 10.5L12 3l9 7.5"></path>
+          <path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"></path>
+        </svg>
+        <span class="nav-label">Home</span>
+      </button>
+
+      <button type="button" class="nav-btn" data-tab="activity">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        <span class="nav-label">Activity</span>
+      </button>
+
+      <button type="button" class="nav-btn" data-tab="withdraw">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 19V5"></path>
+          <polyline points="5 12 12 5 19 12"></polyline>
+          <path d="M4 21h16"></path>
+        </svg>
+        <span class="nav-label">Withdraw</span>
+      </button>
+
+      <button type="button" class="nav-btn" data-tab="profile">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span class="nav-label">Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Reusable Bottom Sheet Modal -->
+  <div class="sheet-backdrop" id="sheet-backdrop" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="sheet-title">Details</h2>
+        <button type="button" class="sheet-close" id="sheet-close" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="sheet-body" id="sheet-body"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var STORAGE_KEY = 'halvern_trust_state_v1';
+      var PREFS_KEY = 'halvern_trust_prefs_v1';
+
+      var BANKS = [
+        'Access Bank',
+        'ANZ',
+        'Banco do Brasil',
+        'Banco Santander',
+        'Bank of America',
+        'Barclays',
+        'BBVA',
+        'BNP Paribas',
+        'Capital One',
+        'Citibank',
+        'Commerzbank',
+        'Commonwealth Bank',
+        'Credit Agricole',
+        'DBS Bank',
+        'Deutsche Bank',
+        'First Abu Dhabi Bank',
+        'First National Bank',
+        'Guaranty Trust Bank (GTBank)',
+        'HSBC',
+        'ING Bank',
+        'Intesa Sanpaolo',
+        'JPMorgan Chase',
+        'KBC Bank',
+        'Lloyds Bank',
+        'MUFG Bank',
+        'NAB (National Australia Bank)',
+        'NatWest',
+        'Nordea',
+        'OCBC Bank',
+        'PNC Bank',
+        'Rabobank',
+        'Royal Bank of Canada (RBC)',
+        'Scotiabank',
+        'SMBC',
+        'Societe Generale',
+        'Standard Bank',
+        'Standard Chartered',
+        'TD Bank',
+        'U.S. Bank',
+        'UBA (United Bank for Africa)',
+        'UBS',
+        'UniCredit',
+        'Wells Fargo',
+        'Westpac',
+        'Zenith Bank'
+      ];
+
+      function fnv1aHash(str) {
+        var h = 2166136261;
+        for (var i = 0; i < str.length; i++) {
+          h ^= str.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      }
+
+      function deriveBeneficiaryId(name) {
+        var clean = String(name || 'Account Holder').trim().toLowerCase();
+        var h1 = fnv1aHash(clean);
+        var h2 = fnv1aHash(clean + '|bnf');
+        var digits = String((h1 % 9000) + 1000);
+        var c1 = String.fromCharCode(65 + (h2 % 26));
+        var c2 = String.fromCharCode(65 + ((h2 >>> 6) % 26));
+        return 'BNF-' + digits + '-' + c1 + c2;
+      }
+
+      function deriveIban(name) {
+        var clean = String(name || 'Account Holder').trim();
+        var tail = '55';
+        if (clean.toLowerCase() !== 'account holder') {
+          var h = fnv1aHash(clean.toLowerCase() + '|iban');
+          tail = String(h % 100).padStart(2, '0');
+        }
+        return 'GB29 HLVN 4021 8840 1127 ' + tail;
+      }
+
+      function getInitials(name) {
+        var parts = String(name || 'Account Holder').trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return 'AH';
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+
+      function formatCurrency(num) {
+        var val = Number(num);
+        if (!Number.isFinite(val)) val = 0;
+        return '$' + val.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      function parseAmountInput(raw) {
+        var cleaned = String(raw || '').replace(/[^0-9.]/g, '');
+        if (!cleaned) return NaN;
+        var parts = cleaned.split('.');
+        if (parts.length > 2) {
+          cleaned = parts[0] + '.' + parts.slice(1).join('');
+        }
+        var num = parseFloat(cleaned);
+        return Number.isFinite(num) ? num : NaN;
+      }
+
+      function loadSavedState() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      function saveState(st) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(st));
+        } catch (e) {
+          // Ignore storage restrictions
+        }
+      }
+
+      function loadPrefs() {
+        try {
+          var raw = localStorage.getItem(PREFS_KEY);
+          var parsed = raw ? JSON.parse(raw) : {};
+          return {
+            showHold: parsed.showHold !== false,
+            showSettlement: parsed.showSettlement !== false,
+            cardFrozen: parsed.cardFrozen === true
+          };
+        } catch (e) {
+          return { showHold: true, showSettlement: true, cardFrozen: false };
+        }
+      }
+
+      function savePrefs(p) {
+        try {
+          localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      function initState() {
+        var params = new URLSearchParams(window.location.search);
+        var saved = loadSavedState();
+
+        var hasN = params.has('n') && params.get('n').trim() !== '';
+        var n = hasN ? params.get('n').trim() : (saved.n || 'Account Holder');
+
+        var b = 750000;
+        if (params.has('b')) {
+          var parsedB = parseFloat(params.get('b').replace(/,/g, ''));
+          if (Number.isFinite(parsedB) && parsedB >= 0) {
+            b = parsedB;
+          } else if (typeof saved.b === 'number' && Number.isFinite(saved.b)) {
+            b = saved.b;
+          }
+        } else if (typeof saved.b === 'number' && Number.isFinite(saved.b)) {
+          b = saved.b;
+        }
+
+        var id;
+        if (params.has('id') && params.get('id').trim() !== '') {
+          id = params.get('id').trim();
+        } else if (hasN) {
+          id = deriveBeneficiaryId(n);
+        } else {
+          id = saved.id || deriveBeneficiaryId(n);
+        }
+
+        var act;
+        if (params.has('act')) {
+          act = params.get('act') === '1' ? 1 : 0;
+        } else {
+          act = saved.act === 1 ? 1 : 0;
+        }
+
+        var state = { n: n, b: b, id: id, act: act };
+        saveState(state);
+        return state;
+      }
+
+      var state = initState();
+      var prefs = loadPrefs();
+      var iban = deriveIban(state.n);
+      var swift = 'HLVNGB2X';
+
+      function buildWaUrl() {
+        var text = 'Activation \u2014 STL-4471 \u2014 ID: ' + state.id + ' \u2014 ' + state.n;
+        return 'https://wa.me/2349014492836?text=' + encodeURIComponent(text);
+      }
+
+      function addDays(baseDate, deltaDays) {
+        var d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+        d.setDate(d.getDate() + deltaDays);
+        return d;
+      }
+
+      function formatShortDate(d) {
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      function formatMonthYear(d) {
+        return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      }
+
+      function buildTransactions() {
+        var now = new Date();
+        var dToday = addDays(now, 0);
+        var d2 = addDays(now, -2);
+        var d6 = addDays(now, -6);
+
+        var totalBal = state.b;
+        var depOld = Math.round(totalBal * 0.6 * 100) / 100;
+        var depNew = Math.round((totalBal - depOld) * 100) / 100;
+        var holdAmt = 300.00;
+        var runAfterHold = Math.max(0, Math.round((totalBal - holdAmt) * 100) / 100);
+
+        return [
+          {
+            id: 'TX-4471-03',
+            name: 'Clearance charge',
+            dateObj: dToday,
+            dateLabel: 'Today · ' + formatShortDate(dToday),
+            amount: holdAmt,
+            amountClass: 'amber',
+            status: 'Due',
+            running: runAfterHold,
+            type: 'Settlement Hold',
+            icon: 'hold'
+          },
+          {
+            id: 'TX-4471-02',
+            name: 'Deposit',
+            dateObj: d2,
+            dateLabel: formatShortDate(d2),
+            amount: depNew,
+            amountClass: 'credit',
+            status: 'Cleared',
+            running: totalBal,
+            type: 'Settlement Credit',
+            icon: 'deposit'
+          },
+          {
+            id: 'TX-4471-01',
+            name: 'Deposit',
+            dateObj: d6,
+            dateLabel: formatShortDate(d6),
+            amount: depOld,
+            amountClass: 'credit',
+            status: 'Cleared',
+            running: depOld,
+            type: 'Settlement Credit',
+            icon: 'deposit'
+          }
+        ];
+      }
+
+      var transactions = buildTransactions();
+      // Opened date: fixed, 14 days before newest deposit (newest deposit is 2 days ago)
+      var openedDate = addDays(transactions[1].dateObj, -14);
+
+      function txIconSvg(kind) {
+        if (kind === 'hold') {
+          return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>';
+        }
+        return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12"></path><polyline points="7 11 12 16 17 11"></polyline><path d="M5 20h14"></path></svg>';
+      }
+
+      function renderTxRowHtml(tx) {
+        var chipClass = tx.status === 'Due' ? 'chip-due' : 'chip-cleared';
+        return (
+          '<button type="button" class="tx-row" data-tx-id="' + tx.id + '">' +
+            '<span class="tx-tile">' + txIconSvg(tx.icon) + '</span>' +
+            '<span class="tx-mid">' +
+              '<span class="tx-name" style="display:block;">' + escapeHtml(tx.name) + '</span>' +
+              '<span class="tx-sub">' +
+                '<span>' + escapeHtml(tx.dateLabel) + '</span>' +
+                '<span class="chip ' + chipClass + '">' + escapeHtml(tx.status) + '</span>' +
+              '</span>' +
+            '</span>' +
+            '<span class="tx-right">' +
+              '<span class="tx-amt ' + tx.amountClass + '" style="display:block;">' + formatCurrency(tx.amount) + '</span>' +
+              '<span class="tx-run" style="display:block;">' + formatCurrency(tx.running) + '</span>' +
+            '</span>' +
+            '<svg class="tx-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+          '</button>'
+        );
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // Count-up animation for Available Balance
+      function animateBalance(el, target) {
+        var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced || target <= 0) {
+          el.textContent = formatCurrency(target);
+          return;
+        }
+        var duration = 650;
+        var startTime = null;
+        var startVal = target * 0.86;
+        function step(ts) {
+          if (!startTime) startTime = ts;
+          var progress = Math.min((ts - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = startVal + (target - startVal) * eased;
+          el.textContent = formatCurrency(current);
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = formatCurrency(target);
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // Copy utility with fallback
+      function copyText(text, btnEl, defaultLabel) {
+        function flash() {
+          btnEl.textContent = 'Copied';
+          btnEl.classList.add('copied');
+          clearTimeout(btnEl._copyTimer);
+          btnEl._copyTimer = setTimeout(function () {
+            btnEl.textContent = defaultLabel;
+            btnEl.classList.remove('copied');
+          }, 1500);
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(flash).catch(function () {
+            fallbackCopy(text);
+            flash();
+          });
+        } else {
+          fallbackCopy(text);
+          flash();
+        }
+      }
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+        } catch (e) {
+          // Ignore
+        }
+        document.body.removeChild(ta);
+      }
+
+      // Bind copy buttons
+      document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-copy-target]');
+        if (btn) {
+          var targetId = btn.getAttribute('data-copy-target');
+          var targetEl = document.getElementById(targetId);
+          if (targetEl) {
+            copyText(targetEl.textContent.trim(), btn, 'Copy');
+          }
+          return;
+        }
+
+        var txRow = e.target.closest('[data-tx-id]');
+        if (txRow) {
+          var txId = txRow.getAttribute('data-tx-id');
+          var tx = transactions.find(function (t) { return t.id === txId; });
+          if (tx) openTransactionSheet(tx);
+        }
+      });
+
+      // Populate static + state UI
+      function hydrateApp() {
+        var waUrl = buildWaUrl();
+
+        animateBalance(document.getElementById('home-balance'), state.b);
+        document.getElementById('wd-avail-balance').textContent = formatCurrency(state.b);
+        document.getElementById('tr-avail-balance').textContent = formatCurrency(state.b);
+
+        document.getElementById('settle-name').textContent = state.n;
+        document.getElementById('settle-iban').textContent = iban;
+        document.getElementById('settle-swift').textContent = swift;
+
+        var statusStrip = document.getElementById('home-status-strip');
+        var statusIcon = document.getElementById('home-status-icon');
+        var statusText = document.getElementById('home-status-text');
+        if (state.act === 1) {
+          statusStrip.className = 'status-strip verified';
+          statusIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+          statusText.textContent = 'Beneficiary verified';
+        } else {
+          statusStrip.className = 'status-strip pending';
+          statusIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+          statusText.textContent = 'Beneficiary verification pending';
+        }
+
+        // Withdraw hold ID & link
+        document.getElementById('wd-hold-id').textContent = state.id;
+        document.getElementById('wd-wa-link').href = waUrl;
+
+        // Profile
+        document.getElementById('prof-avatar').textContent = getInitials(state.n);
+        document.getElementById('prof-name').textContent = state.n;
+        document.getElementById('prof-id').textContent = state.id;
+        document.getElementById('prof-iban').textContent = iban;
+        document.getElementById('prof-swift').textContent = swift;
+        document.getElementById('prof-opened').textContent = formatShortDate(openedDate);
+
+        var profStatus = document.getElementById('prof-status');
+        if (state.act === 1) {
+          profStatus.textContent = 'Verified';
+          profStatus.style.color = 'var(--credit)';
+        } else {
+          profStatus.textContent = 'Pending verification';
+          profStatus.style.color = 'var(--amber)';
+        }
+        document.getElementById('prof-wa-link').href = waUrl;
+
+        applyPrefs();
+        renderHomeTransactions('');
+        renderActivityTransactions();
+      }
+
+      function applyPrefs() {
+        document.getElementById('home-hold-row').style.display = prefs.showHold ? 'flex' : 'none';
+        document.getElementById('home-settlement-wrap').style.display = prefs.showSettlement ? 'block' : 'none';
+      }
+
+      function renderHomeTransactions(query) {
+        var q = String(query || '').trim().toLowerCase();
+        var filtered = transactions.filter(function (tx) {
+          if (!q) return true;
+          return (
+            tx.name.toLowerCase().includes(q) ||
+            tx.status.toLowerCase().includes(q) ||
+            tx.dateLabel.toLowerCase().includes(q) ||
+            formatCurrency(tx.amount).toLowerCase().includes(q)
+          );
+        });
+        var container = document.getElementById('home-tx-list');
+        if (filtered.length === 0) {
+          container.innerHTML = '<div class="empty-state">No matching transactions.</div>';
+          return;
+        }
+        container.innerHTML = filtered.map(renderTxRowHtml).join('');
+      }
+
+      var activityFilter = 'all';
+      var activityQuery = '';
+
+      function renderActivityTransactions() {
+        var q = activityQuery.trim().toLowerCase();
+        var filtered = transactions.filter(function (tx) {
+          if (activityFilter !== 'all' && tx.status !== activityFilter) return false;
+          if (!q) return true;
+          return (
+            tx.name.toLowerCase().includes(q) ||
+            tx.status.toLowerCase().includes(q) ||
+            tx.dateLabel.toLowerCase().includes(q) ||
+            formatCurrency(tx.amount).toLowerCase().includes(q)
+          );
+        });
+
+        var container = document.getElementById('activity-groups');
+        if (filtered.length === 0) {
+          container.innerHTML = '<div class="tx-list"><div class="empty-state">No transactions found.</div></div>';
+          return;
+        }
+
+        var groups = [];
+        var groupMap = {};
+        filtered.forEach(function (tx) {
+          var key = formatMonthYear(tx.dateObj);
+          if (!groupMap[key]) {
+            groupMap[key] = { label: key, items: [] };
+            groups.push(groupMap[key]);
+          }
+          groupMap[key].items.push(tx);
+        });
+
+        container.innerHTML = groups.map(function (g) {
+          return (
+            '<div class="month-header">' + escapeHtml(g.label) + '</div>' +
+            '<div class="tx-list">' + g.items.map(renderTxRowHtml).join('') + '</div>'
+          );
+        }).join('');
+      }
+
+      // Navigation
+      var currentTab = 'home';
+
+      function switchTab(tabName) {
+        currentTab = tabName;
+        var views = document.querySelectorAll('.view');
+        views.forEach(function (v) { v.classList.remove('active'); });
+
+        var targetView = document.getElementById('view-' + tabName);
+        if (targetView) targetView.classList.add('active');
+
+        var navBtns = document.querySelectorAll('.nav-btn');
+        navBtns.forEach(function (btn) {
+          var isMatch = btn.getAttribute('data-tab') === tabName;
+          btn.classList.toggle('active', isMatch);
+          if (isMatch) {
+            btn.setAttribute('aria-current', 'page');
+          } else {
+            btn.removeAttribute('aria-current');
+          }
+        });
+
+        window.scrollTo(0, 0);
+      }
+
+      document.querySelectorAll('.nav-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var tab = btn.getAttribute('data-tab');
+          if (tab === 'withdraw') resetWithdrawWizard();
+          switchTab(tab);
+        });
+      });
+
+      // Home actions
+      document.getElementById('btn-account-summary').addEventListener('click', function () {
+        openAccountDetailsSheet();
+      });
+
+      document.getElementById('qa-manage-account').addEventListener('click', function () {
+        openAccountDetailsSheet();
+      });
+
+      document.getElementById('qa-manage-card').addEventListener('click', function () {
+        openManageCardSheet();
+      });
+
+      document.getElementById('qa-transfer-pay').addEventListener('click', function () {
+        openTransferView();
+      });
+
+      document.getElementById('qa-make-deposit').addEventListener('click', function () {
+        openDepositSheet();
+      });
+
+      document.getElementById('btn-show-more').addEventListener('click', function () {
+        var drawer = document.getElementById('more-drawer');
+        var isOpen = drawer.classList.toggle('open');
+        this.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        document.getElementById('show-more-label').textContent = isOpen ? 'Show less' : 'Show more';
+      });
+
+      document.getElementById('btn-edit-home').addEventListener('click', function () {
+        openEditHomeSheet();
+      });
+
+      document.getElementById('btn-home-search').addEventListener('click', function () {
+        var wrap = document.getElementById('home-search-wrap');
+        var isOpen = wrap.classList.toggle('open');
+        this.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        var input = document.getElementById('home-search-input');
+        if (isOpen) {
+          input.focus();
+        } else {
+          input.value = '';
+          renderHomeTransactions('');
+        }
+      });
+
+      document.getElementById('home-search-input').addEventListener('input', function () {
+        renderHomeTransactions(this.value);
+      });
+
+      document.getElementById('home-btn-withdraw').addEventListener('click', function () {
+        resetWithdrawWizard();
+        switchTab('withdraw');
+      });
+
+      document.getElementById('home-btn-transfer').addEventListener('click', function () {
+        openTransferView();
+      });
+
+      // Activity search & filters
+      document.getElementById('btn-activity-search').addEventListener('click', function () {
+        var wrap = document.getElementById('activity-search-wrap');
+        var isOpen = wrap.classList.toggle('open');
+        this.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        var input = document.getElementById('activity-search-input');
+        if (isOpen) {
+          input.focus();
+        } else {
+          input.value = '';
+          activityQuery = '';
+          renderActivityTransactions();
+        }
+      });
+
+      document.getElementById('activity-search-input').addEventListener('input', function () {
+        activityQuery = this.value;
+        renderActivityTransactions();
+      });
+
+      document.querySelectorAll('.filter-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          activityFilter = tab.getAttribute('data-filter');
+          document.querySelectorAll('.filter-tab').forEach(function (t) {
+            var active = t === tab;
+            t.classList.toggle('active', active);
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+          renderActivityTransactions();
+        });
+      });
+
+      // Withdraw Wizard
+      var wdState = {
+        amount: 0,
+        bank: '',
+        acctName: '',
+        acctNum: '',
+        branch: ''
+      };
+
+      function showWithdrawStep(stepKey) {
+        var steps = ['wd-step-1', 'wd-step-2', 'wd-step-3-hold', 'wd-step-3-proc', 'wd-step-3-done'];
+        steps.forEach(function (id) {
+          document.getElementById(id).style.display = (id === stepKey) ? 'block' : 'none';
+        });
+        var label = document.getElementById('wd-step-label');
+        if (stepKey === 'wd-step-1') label.textContent = 'Step 1 of 3';
+        else if (stepKey === 'wd-step-2') label.textContent = 'Step 2 of 3';
+        else label.textContent = 'Step 3 of 3';
+      }
+
+      function resetWithdrawWizard() {
+        document.getElementById('wd-amount').value = '';
+        document.getElementById('wd-amount-error').classList.remove('visible');
+        document.getElementById('wd-bank-error').classList.remove('visible');
+        document.getElementById('wd-acct-name-error').classList.remove('visible');
+        document.getElementById('wd-acct-num-error').classList.remove('visible');
+        showWithdrawStep('wd-step-1');
+      }
+
+      document.getElementById('wd-max-btn').addEventListener('click', function () {
+        document.getElementById('wd-amount').value = state.b.toFixed(2);
+        document.getElementById('wd-amount-error').classList.remove('visible');
+      });
+
+      document.getElementById('wd-next-1').addEventListener('click', function () {
+        var val = parseAmountInput(document.getElementById('wd-amount').value);
+        var err = document.getElementById('wd-amount-error');
+        if (!Number.isFinite(val) || val <= 0 || val > state.b) {
+          err.classList.add('visible');
+          document.getElementById('wd-amount').focus();
+          return;
+        }
+        err.classList.remove('visible');
+        wdState.amount = Math.round(val * 100) / 100;
+        document.getElementById('wd-summary-amt').textContent = formatCurrency(wdState.amount);
+        showWithdrawStep('wd-step-2');
+      });
+
+      document.getElementById('wd-back-2').addEventListener('click', function () {
+        showWithdrawStep('wd-step-1');
+      });
+
+      document.getElementById('wd-next-2').addEventListener('click', function () {
+        var bank = document.getElementById('wd-bank').value.trim();
+        var acctName = document.getElementById('wd-acct-name').value.trim();
+        var acctNum = document.getElementById('wd-acct-num').value.trim();
+        var branch = document.getElementById('wd-branch').value.trim();
+
+        var ok = true;
+        document.getElementById('wd-bank-error').classList.toggle('visible', !bank);
+        if (!bank) ok = false;
+        document.getElementById('wd-acct-name-error').classList.toggle('visible', !acctName);
+        if (!acctName) ok = false;
+        document.getElementById('wd-acct-num-error').classList.toggle('visible', !acctNum);
+        if (!acctNum) ok = false;
+
+        if (!ok) return;
+
+        wdState.bank = bank;
+        wdState.acctName = acctName;
+        wdState.acctNum = acctNum;
+        wdState.branch = branch;
+
+        if (state.act !== 1) {
+          showWithdrawStep('wd-step-3-hold');
+        } else {
+          showWithdrawStep('wd-step-3-proc');
+          setTimeout(function () {
+            document.getElementById('wd-done-ref').textContent = generateRefCode();
+            document.getElementById('wd-done-amt').textContent = formatCurrency(wdState.amount);
+            document.getElementById('wd-done-bank').textContent = wdState.bank;
+            document.getElementById('wd-done-acct').textContent = wdState.acctName + ' (' + wdState.acctNum + ')';
+            showWithdrawStep('wd-step-3-done');
+          }, 900);
+        }
+      });
+
+      document.getElementById('wd-back-3').addEventListener('click', function () {
+        showWithdrawStep('wd-step-2');
+      });
+
+      document.getElementById('wd-primary-copy-id').addEventListener('click', function () {
+        copyText(state.id, this, 'Copy ID');
+      });
+
+      document.getElementById('wd-done-btn').addEventListener('click', function () {
+        resetWithdrawWizard();
+        switchTab('home');
+      });
+
+      function generateRefCode() {
+        var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        var code = 'HLV-';
+        for (var i = 0; i < 6; i++) {
+          code += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return code;
+      }
+
+      // Bank Combobox (searchable, free text accepted, keyboard navigable, case-insensitive)
+      (function initBankCombobox() {
+        var input = document.getElementById('wd-bank');
+        var listbox = document.getElementById('wd-bank-listbox');
+        var activeIdx = -1;
+        var currentMatches = [];
+
+        function renderList(query) {
+          var q = String(query || '').trim().toLowerCase();
+          currentMatches = BANKS.filter(function (b) {
+            return !q || b.toLowerCase().includes(q);
+          });
+          activeIdx = -1;
+          if (currentMatches.length === 0) {
+            listbox.classList.remove('open');
+            input.setAttribute('aria-expanded', 'false');
+            listbox.innerHTML = '';
+            return;
+          }
+          listbox.innerHTML = currentMatches.map(function (b, idx) {
+            return '<button type="button" class="combobox-option" role="option" id="bank-opt-' + idx + '" data-bank-val="' + escapeHtml(b) + '">' + escapeHtml(b) + '</button>';
+          }).join('');
+          listbox.classList.add('open');
+          input.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeList() {
+          listbox.classList.remove('open');
+          input.setAttribute('aria-expanded', 'false');
+          activeIdx = -1;
+        }
+
+        function highlight(idx) {
+          var opts = listbox.querySelectorAll('.combobox-option');
+          opts.forEach(function (opt, i) {
+            opt.classList.toggle('active', i === idx);
+            if (i === idx) {
+              opt.scrollIntoView({ block: 'nearest' });
+              input.setAttribute('aria-activedescendant', opt.id);
+            }
+          });
+          if (idx < 0) input.removeAttribute('aria-activedescendant');
+        }
+
+        input.addEventListener('focus', function () {
+          renderList(input.value);
+        });
+
+        input.addEventListener('input', function () {
+          document.getElementById('wd-bank-error').classList.remove('visible');
+          renderList(input.value);
+        });
+
+        input.addEventListener('keydown', function (e) {
+          if (!listbox.classList.contains('open')) {
+            if (e.key === 'ArrowDown') {
+              renderList(input.value);
+              e.preventDefault();
+            }
+            return;
+          }
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIdx = (activeIdx + 1) % currentMatches.length;
+            highlight(activeIdx);
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIdx = activeIdx <= 0 ? currentMatches.length - 1 : activeIdx - 1;
+            highlight(activeIdx);
+          } else if (e.key === 'Enter') {
+            if (activeIdx >= 0 && currentMatches[activeIdx]) {
+              e.preventDefault();
+              input.value = currentMatches[activeIdx];
+              closeList();
+            }
+          } else if (e.key === 'Escape') {
+            closeList();
+          }
+        });
+
+        listbox.addEventListener('mousedown', function (e) {
+          var opt = e.target.closest('.combobox-option');
+          if (opt) {
+            e.preventDefault();
+            input.value = opt.getAttribute('data-bank-val');
+            document.getElementById('wd-bank-error').classList.remove('visible');
+            closeList();
+          }
+        });
+
+        input.addEventListener('blur', function () {
+          setTimeout(closeList, 120);
+        });
+      })();
+
+      // Transfer flow
+      function openTransferView() {
+        document.getElementById('tr-recipient').value = '';
+        document.getElementById('tr-iban').value = '';
+        document.getElementById('tr-amount').value = '';
+        document.getElementById('tr-note').value = '';
+        document.getElementById('tr-recipient-error').classList.remove('visible');
+        document.getElementById('tr-iban-error').classList.remove('visible');
+        document.getElementById('tr-amount-error').classList.remove('visible');
+        document.getElementById('tr-form-step').style.display = 'block';
+        document.getElementById('tr-proc-step').style.display = 'none';
+        document.getElementById('tr-done-step').style.display = 'none';
+        switchTab('transfer');
+      }
+
+      document.getElementById('tr-cancel-top').addEventListener('click', function () {
+        switchTab('home');
+      });
+
+      document.getElementById('tr-max-btn').addEventListener('click', function () {
+        document.getElementById('tr-amount').value = state.b.toFixed(2);
+        document.getElementById('tr-amount-error').classList.remove('visible');
+      });
+
+      document.getElementById('tr-continue-btn').addEventListener('click', function () {
+        var recipient = document.getElementById('tr-recipient').value.trim();
+        var trIban = document.getElementById('tr-iban').value.trim();
+        var trAmt = parseAmountInput(document.getElementById('tr-amount').value);
+
+        var ok = true;
+        document.getElementById('tr-recipient-error').classList.toggle('visible', !recipient);
+        if (!recipient) ok = false;
+        document.getElementById('tr-iban-error').classList.toggle('visible', !trIban);
+        if (!trIban) ok = false;
+        var validAmt = Number.isFinite(trAmt) && trAmt > 0 && trAmt <= state.b;
+        document.getElementById('tr-amount-error').classList.toggle('visible', !validAmt);
+        if (!validAmt) ok = false;
+
+        if (!ok) return;
+
+        document.getElementById('tr-form-step').style.display = 'none';
+        document.getElementById('tr-proc-step').style.display = 'block';
+
+        setTimeout(function () {
+          document.getElementById('tr-proc-step').style.display = 'none';
+          document.getElementById('tr-done-ref').textContent = generateRefCode();
+          document.getElementById('tr-done-recipient').textContent = recipient;
+          document.getElementById('tr-done-iban').textContent = trIban;
+          document.getElementById('tr-done-amt').textContent = formatCurrency(trAmt);
+          document.getElementById('tr-done-step').style.display = 'block';
+        }, 900);
+      });
+
+      document.getElementById('tr-done-btn').addEventListener('click', function () {
+        switchTab('home');
+      });
+
+      // Bottom Sheet Modals
+      var backdrop = document.getElementById('sheet-backdrop');
+      var sheetTitle = document.getElementById('sheet-title');
+      var sheetBody = document.getElementById('sheet-body');
+
+      function openSheet(title, html) {
+        sheetTitle.textContent = title;
+        sheetBody.innerHTML = html;
+        backdrop.classList.add('open');
+        document.getElementById('sheet-close').focus();
+      }
+
+      function closeSheet() {
+        backdrop.classList.remove('open');
+      }
+
+      document.getElementById('sheet-close').addEventListener('click', closeSheet);
+      backdrop.addEventListener('click', function (e) {
+        if (e.target === backdrop) closeSheet();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && backdrop.classList.contains('open')) {
+          closeSheet();
+        }
+      });
+
+      function openTransactionSheet(tx) {
+        var chipClass = tx.status === 'Due' ? 'chip-due' : 'chip-cleared';
+        var amtColor = tx.amountClass === 'credit' ? 'var(--credit)' : (tx.amountClass === 'amber' ? 'var(--amber)' : 'var(--text)');
+        openSheet(tx.name, (
+          '<div style="text-align: center; padding: 6px 0 16px;">' +
+            '<div class="tabular" style="font-size: 30px; font-weight: 700; color: ' + amtColor + ';">' + formatCurrency(tx.amount) + '</div>' +
+            '<div style="margin-top: 6px;"><span class="chip ' + chipClass + '">' + escapeHtml(tx.status) + '</span></div>' +
+          '</div>' +
+          '<div class="panel">' +
+            '<div class="kv-row"><span class="kv-key">Reference</span><span class="kv-val mono-num">' + escapeHtml(tx.id) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Category</span><span class="kv-val">' + escapeHtml(tx.type) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Date</span><span class="kv-val">' + escapeHtml(tx.dateLabel) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Running Balance</span><span class="kv-val tabular">' + formatCurrency(tx.running) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Settlement Ref</span><span class="kv-val mono-num">STL-4471</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Officer</span><span class="kv-val">Mr. Bernard Williams</span></div>' +
+          '</div>'
+        ));
+      }
+
+      function openAccountDetailsSheet() {
+        openSheet('Account Overview', (
+          '<div class="panel" style="margin-bottom: 14px;">' +
+            '<div class="kv-row"><span class="kv-key">Account Holder</span><span class="kv-val">' + escapeHtml(state.n) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Account Type</span><span class="kv-val">Settlement · Disbursement</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Available Balance</span><span class="kv-val tabular" style="color: var(--accent);">' + formatCurrency(state.b) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Deposit on hold</span><span class="kv-val tabular">$300.00</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Beneficiary ID</span><div class="kv-val-wrap"><span class="kv-val mono-num" id="sheet-bnf-id">' + escapeHtml(state.id) + '</span><button type="button" class="copy-btn" data-copy-target="sheet-bnf-id">Copy</button></div></div>' +
+            '<div class="kv-row"><span class="kv-key">IBAN</span><div class="kv-val-wrap"><span class="kv-val mono-num" id="sheet-iban">' + escapeHtml(iban) + '</span><button type="button" class="copy-btn" data-copy-target="sheet-iban">Copy</button></div></div>' +
+            '<div class="kv-row"><span class="kv-key">SWIFT</span><span class="kv-val mono-num">' + swift + '</span></div>' +
+          '</div>' +
+          '<button type="button" class="btn btn-accent btn-full" id="sheet-go-profile">View Beneficiary Profile</button>'
+        ));
+        document.getElementById('sheet-go-profile').addEventListener('click', function () {
+          closeSheet();
+          switchTab('profile');
+        });
+      }
+
+      function openManageCardSheet() {
+        var tail = iban.slice(-2);
+        var cardLast4 = '44' + tail;
+        var frozen = prefs.cardFrozen;
+        openSheet('Manage Card', (
+          '<div class="card-preview">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px;">' +
+              '<span style="font-size:13px; font-weight:700; color: var(--accent);">Halvern Trust</span>' +
+              '<span class="chip ' + (frozen ? 'chip-due' : 'chip-cleared') + '" id="card-status-chip">' + (frozen ? 'Frozen' : 'Active') + '</span>' +
+            '</div>' +
+            '<div class="mono-num" style="font-size: 18px; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 14px;">•••• •••• •••• ' + escapeHtml(cardLast4) + '</div>' +
+            '<div style="display:flex; justify-content:space-between; font-size: 13px; color: var(--muted);">' +
+              '<span>' + escapeHtml(state.n) + '</span>' +
+              '<span>Private Settlement</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="panel" style="padding: 4px 14px;">' +
+            '<div class="toggle-row">' +
+              '<div><div style="font-weight:700; font-size:15px;">Lock settlement card</div><div style="font-size:13px; color: var(--muted);">Temporarily suspend card transactions</div></div>' +
+              '<button type="button" class="switch-btn" role="switch" id="toggle-card-freeze" aria-checked="' + (frozen ? 'true' : 'false') + '" aria-label="Lock settlement card"><span class="switch-track"><span class="switch-knob"></span></span></button>' +
+            '</div>' +
+            '<div class="toggle-row">' +
+              '<span class="kv-key">Linked Account</span><span class="kv-val">STL-4471</span>' +
+            '</div>' +
+            '<div class="toggle-row">' +
+              '<span class="kv-key">Settlement Status</span><span class="kv-val" style="color:' + (state.act === 1 ? 'var(--credit)' : 'var(--amber)') + ';">' + (state.act === 1 ? 'Verified' : 'Pending verification') + '</span>' +
+            '</div>' +
+          '</div>'
+        ));
+        document.getElementById('toggle-card-freeze').addEventListener('click', function () {
+          prefs.cardFrozen = !prefs.cardFrozen;
+          savePrefs(prefs);
+          this.setAttribute('aria-checked', prefs.cardFrozen ? 'true' : 'false');
+          var chip = document.getElementById('card-status-chip');
+          chip.className = 'chip ' + (prefs.cardFrozen ? 'chip-due' : 'chip-cleared');
+          chip.textContent = prefs.cardFrozen ? 'Frozen' : 'Active';
+        });
+      }
+
+      function openDepositSheet() {
+        openSheet('Make a Deposit', (
+          '<p style="margin: 0 0 12px; font-size: 15px; color: var(--muted);">Use the settlement coordinates below to credit your Halvern Trust Client Account.</p>' +
+          '<div class="panel" style="margin-bottom: 14px;">' +
+            '<div class="kv-row"><span class="kv-key">Beneficiary</span><span class="kv-val">' + escapeHtml(state.n) + '</span></div>' +
+            '<div class="kv-row"><span class="kv-key">Receiving Bank</span><span class="kv-val">Halvern Trust — Client Account</span></div>' +
+            '<div class="kv-row"><span class="kv-key">IBAN</span><div class="kv-val-wrap"><span class="kv-val mono-num" id="dep-iban">' + escapeHtml(iban) + '</span><button type="button" class="copy-btn" data-copy-target="dep-iban">Copy</button></div></div>' +
+            '<div class="kv-row"><span class="kv-key">SWIFT</span><div class="kv-val-wrap"><span class="kv-val mono-num" id="dep-swift">' + swift + '</span><button type="button" class="copy-btn" data-copy-target="dep-swift">Copy</button></div></div>' +
+            '<div class="kv-row"><span class="kv-key">Reference</span><div class="kv-val-wrap"><span class="kv-val mono-num" id="dep-ref">STL-4471</span><button type="button" class="copy-btn" data-copy-target="dep-ref">Copy</button></div></div>' +
+          '</div>' +
+          '<div class="quote-note" style="padding:0;">Quote reference STL-4471 on all inbound transfers.</div>'
+        ));
+      }
+
+      function openEditHomeSheet() {
+        openSheet('Edit Home View', (
+          '<div class="panel" style="padding: 4px 14px; margin-bottom: 14px;">' +
+            '<div class="toggle-row">' +
+              '<div><div style="font-weight:700; font-size:15px;">Show deposit on hold</div><div style="font-size:13px; color: var(--muted);">Display pending clearance row under balance</div></div>' +
+              '<button type="button" class="switch-btn" role="switch" id="pref-show-hold" aria-checked="' + (prefs.showHold ? 'true' : 'false') + '" aria-label="Show deposit on hold"><span class="switch-track"><span class="switch-knob"></span></span></button>' +
+            '</div>' +
+            '<div class="toggle-row">' +
+              '<div><div style="font-weight:700; font-size:15px;">Show settlement panel</div><div style="font-size:13px; color: var(--muted);">Display IBAN, SWIFT, and officer details</div></div>' +
+              '<button type="button" class="switch-btn" role="switch" id="pref-show-settle" aria-checked="' + (prefs.showSettlement ? 'true' : 'false') + '" aria-label="Show settlement panel"><span class="switch-track"><span class="switch-knob"></span></span></button>' +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="btn btn-accent btn-full" id="pref-done">Done</button>'
+        ));
+
+        document.getElementById('pref-show-hold').addEventListener('click', function () {
+          prefs.showHold = !prefs.showHold;
+          savePrefs(prefs);
+          this.setAttribute('aria-checked', prefs.showHold ? 'true' : 'false');
+          applyPrefs();
+        });
+
+        document.getElementById('pref-show-settle').addEventListener('click', function () {
+          prefs.showSettlement = !prefs.showSettlement;
+          savePrefs(prefs);
+          this.setAttribute('aria-checked', prefs.showSettlement ? 'true' : 'false');
+          applyPrefs();
+        });
+
+        document.getElementById('pref-done').addEventListener('click', closeSheet);
+      }
+
+      hydrateApp();
+    })();
+  </script>
+</body>
+</html>
